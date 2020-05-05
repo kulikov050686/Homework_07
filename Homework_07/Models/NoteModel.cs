@@ -9,15 +9,28 @@ namespace Homework_07
     /// Класс записи в записной книжке
     /// </summary>
     public class NoteModel : INotifyPropertyChanged
-    {        
+    {
         string assetName;
         uint lotVolume;
         uint numberOfLots;
         double purchasePrice;
         double sellingPrice;
         double income;
+        string date;
 
         public static readonly DependencyProperty PriceProperty;
+
+        /// <summary>
+        /// Дата создания записи
+        /// </summary>
+        public string Date
+        {
+            get
+            {
+                date = DateTime.Now.ToString("dd:MM:yyyy");
+                return date;
+            }
+        }        
 
         /// <summary>
         /// Название актива

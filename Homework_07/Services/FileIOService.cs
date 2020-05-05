@@ -44,26 +44,6 @@ namespace Homework_07
         }
 
         /// <summary>
-        /// Загрузить данные из файла
-        /// </summary>
-        public OpenSaveFileModel LoadData()
-        {
-            var fileExists = File.Exists(PathFile);
-
-            if (!fileExists)
-            {
-                File.CreateText(PathFile).Dispose();
-                return new OpenSaveFileModel();
-            }
-
-            using (var reader = File.OpenText(PathFile))
-            {
-                var fileTaxt = reader.ReadToEnd();
-                return JsonConvert.DeserializeObject<OpenSaveFileModel>(fileTaxt);
-            }
-        }
-
-        /// <summary>
         /// Сохранить лист в файл
         /// </summary>
         public void SaveDataList(BindingList<NoteModel> listToSave)
@@ -73,18 +53,6 @@ namespace Homework_07
                 string output = JsonConvert.SerializeObject(listToSave);
                 writer.Write(output);
             }
-        }
-
-        /// <summary>
-        /// Сохранить данные в файл
-        /// </summary>
-        public void SaveData(OpenSaveFileModel dataToSave)
-        {
-            using (StreamWriter writer = File.CreateText(PathFile))
-            {
-                string output = JsonConvert.SerializeObject(dataToSave);
-                writer.Write(output);
-            }
-        }
+        }        
     }
 }

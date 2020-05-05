@@ -84,9 +84,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Models\DateModel.cs" />
-    <Compile Include="Models\OpenSaveFileModel.cs" />
+    <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Services\FileIOService.cs" />
+    <Compile Include="Services\SortBindingList.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

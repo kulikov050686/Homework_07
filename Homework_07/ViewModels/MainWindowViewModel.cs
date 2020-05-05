@@ -1,9 +1,7 @@
 ﻿using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
 using System;
 using System.ComponentModel;
 using System.Windows;
-using System.Windows.Input;
 
 namespace Homework_07
 {
@@ -17,9 +15,12 @@ namespace Homework_07
         const string title = "Блокнот трейдера";
         private string PATH;
         BindingList<NoteModel> dataInNotebookList;
-        string profit;
-        ICommand openFileClick;
-        ICommand saveFileClick;
+        string profit;        
+        bool changeFile;
+        RelayCommand openFileClick;
+        RelayCommand saveFileClick;
+        RelayCommand closeApplication;
+        RelayCommand sortByDateCommand;
 
         #endregion
 
@@ -28,13 +29,7 @@ namespace Homework_07
         /// <summary>
         /// Название приложения
         /// </summary>
-        public string Title
-        {
-            get
-            {
-                return title;
-            }
-        }
+        public string Title { get; set; }        
 
         /// <summary>
         /// Лист записей
@@ -61,18 +56,7 @@ namespace Homework_07
                 RaisePropertyChanged(() => DataInNotebookList);
             }
         }
-
-        /// <summary>
-        /// Вывод даты
-        /// </summary>
-        public string DateNow
-        {
-            get
-            {
-                return DateModel.ToString();
-            }
-        }
-
+        
         /// <summary>
         /// Вывод суммарного дохода
         /// </summary>
@@ -88,11 +72,11 @@ namespace Homework_07
                 RaisePropertyChanged(() => Profit);
             }
         }
-
+       
         /// <summary>
         /// Команда открытия файла
         /// </summary>
-        public ICommand OpenFileClick
+        public RelayCommand OpenFileClick
         {
             get
             {
@@ -103,12 +87,34 @@ namespace Homework_07
         /// <summary>
         /// Команда сохранеия в файл
         /// </summary>
-        public ICommand SaveFileClick
+        public RelayCommand SaveFileClick
         {
             get
             {
                 return saveFileClick ?? (saveFileClick = new RelayCommand(CommandSaveFile));
             }
+        }
+
+        /// <summary>
+        /// Команда закрытия приложения
+        /// </summary>
+        public RelayCommand CloseApplication 
+        {
+            get 
+            {
+                return closeApplication ?? (closeApplication = new RelayCommand(Close)); 
+            }
+        }
+
+        /// <summary>
+        /// Команда сортировки листа по дате
+        /// </summary>
+        public RelayCommand SortByDateCommand 
+        {
+            get 
+            {
+                return sortByDateCommand ?? (sortByDateCommand = new RelayCommand(SortByDate));
+            } 
         }
 
         #endregion
@@ -120,7 +126,10 @@ namespace Homework_07
         /// </summary>
         public MainWindowViewModel()
         {
-            DataInNotebookList = new BindingList<NoteModel>();
+            Title = title;
+            DataInNotebookList = new BindingList<NoteModel>();           
+            changeFile = false;
+
             dataInNotebookList.ListChanged += DataInNotebookList_ListChanged;            
         }
 
@@ -136,6 +145,7 @@ namespace Homework_07
                 e.ListChangedType == ListChangedType.ItemChanged)
             {
                 Profit = TotalIncome().ToString();
+                changeFile = true;
             }           
         }
 
@@ -164,17 +174,11 @@ namespace Homework_07
         /// </summary>        
         private bool SaveFile()
         {
-            OpenSaveFileModel openSaveFile = new OpenSaveFileModel();
-
-            openSaveFile.Date = DateTime.Now;
-            openSaveFile.ListData = DataInNotebookList;
-            openSaveFile.TotalIncome = TotalIncome();
-
             FileIOService fileIOService = new FileIOService(PATH);
 
             try
             {
-                fileIOService.SaveData(openSaveFile);
+                fileIOService.SaveDataList(DataInNotebookList);
                 return true;
             }
             catch (Exception e)
@@ -189,17 +193,11 @@ namespace Homework_07
         /// </summary>        
         private bool LoadFile()
         {
-            FileIOService fileIOService = new FileIOService(PATH);
-            OpenSaveFileModel openSaveFile = new OpenSaveFileModel();
+            FileIOService fileIOService = new FileIOService(PATH);           
 
             try
             {
-                openSaveFile = fileIOService.LoadData();
-                DataInNotebookList = openSaveFile.ListData;
-                profit = openSaveFile.TotalIncome.ToString();
-
-                dataInNotebookList.ListChanged += DataInNotebookList_ListChanged;
-
+                DataInNotebookList = fileIOService.LoadDataList();
                 return true;
             }
             catch (Exception e)
@@ -212,7 +210,7 @@ namespace Homework_07
         /// <summary>
         /// Открытие диалогового окна для чтения из файла
         /// </summary>
-        private void CommandOpenFile()
+        private void CommandOpenFile(object obj)
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
 
@@ -237,7 +235,7 @@ namespace Homework_07
         /// <summary>
         /// Открытие диалогового окна для записи в файл
         /// </summary>
-        private void CommandSaveFile()
+        private void CommandSaveFile(object obj)
         {
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
 
@@ -253,7 +251,33 @@ namespace Homework_07
                 {
                     Application.Current.Shutdown();
                 }
+
+                changeFile = false;
             }
+        }        
+
+        /// <summary>
+        /// Закрытие приложения
+        /// </summary>        
+        private void Close(object obj)
+        {
+            if(DataInNotebookList.Count != 0 && changeFile)
+            {
+                if(MessageBoxResult.OK == MessageBox.Show("Сохранить изменения в файле?", "Сообщение", MessageBoxButton.OKCancel))
+                {
+                    CommandSaveFile(null);
+                }                
+            }
+        }
+        
+        /// <summary>
+        /// Сортировка листа по дате создания записей
+        /// </summary>        
+        private void SortByDate(object obj)
+        {
+            MessageBox.Show("Вызов сортировки");
+
+            SortBindingList.SortDate(DataInNotebookList);
         }
     }
 }

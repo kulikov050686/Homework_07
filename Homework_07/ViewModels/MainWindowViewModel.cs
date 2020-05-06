@@ -1,5 +1,6 @@
 ﻿using GalaSoft.MvvmLight;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 
@@ -11,25 +12,25 @@ namespace Homework_07
     public class MainWindowViewModel : ViewModelBase
     {
         #region Закрытые поля
-
-        const string title = "Блокнот трейдера";
+                
         private string PATH;
         BindingList<NoteModel> dataInNotebookList;
         string profit;        
         bool changeFile;
+        ItemsComboBox currentSelection;
         RelayCommand openFileClick;
         RelayCommand saveFileClick;
         RelayCommand closeApplication;
-        RelayCommand sortByDateCommand;
+        RelayCommand selectedSort;       
 
         #endregion
 
-        #region Открытые поля
+        #region Открытые поля        
 
         /// <summary>
         /// Название приложения
         /// </summary>
-        public string Title { get; set; }        
+        public string Title { get; set; }
 
         /// <summary>
         /// Лист записей
@@ -107,15 +108,41 @@ namespace Homework_07
         }
 
         /// <summary>
-        /// Команда сортировки листа по дате
+        /// Команда выбора сортировки листа
         /// </summary>
-        public RelayCommand SortByDateCommand 
+        public RelayCommand SelectedSort
         {
             get 
             {
-                return sortByDateCommand ?? (sortByDateCommand = new RelayCommand(SortByDate));
+                return selectedSort ?? (selectedSort = new RelayCommand(Sort));
             } 
         }
+
+        /// <summary>
+        /// Выбор пункта
+        /// </summary>
+        public ItemsComboBox CurrentSelection 
+        {
+            get 
+            { 
+                return currentSelection; 
+            }
+            set 
+            { 
+                currentSelection = value;
+                RaisePropertyChanged(() => CurrentSelection);
+            } 
+        }
+
+        /// <summary>
+        /// Список названий пунктов
+        /// </summary>
+        public List<ItemsComboBox> Items { get; } = new List<ItemsComboBox>
+        {
+            new ItemsComboBox { NameItem = "Дате", NumberItem = "0"},
+            new ItemsComboBox { NameItem = "Названию актива", NumberItem = "1"},
+            new ItemsComboBox { NameItem = "Полученному доходу", NumberItem = "2"}
+        };
 
         #endregion
 
@@ -126,7 +153,8 @@ namespace Homework_07
         /// </summary>
         public MainWindowViewModel()
         {
-            Title = title;
+            Title = "Блокнот трейдера";            
+
             DataInNotebookList = new BindingList<NoteModel>();           
             changeFile = false;
 
@@ -197,7 +225,22 @@ namespace Homework_07
 
             try
             {
-                DataInNotebookList = fileIOService.LoadDataList();
+                if(DataInNotebookList.Count == 0)
+                {
+                    DataInNotebookList = fileIOService.LoadDataList();
+                }
+                else
+                {
+                    BindingList<NoteModel> Temp = new BindingList<NoteModel>();
+
+                    Temp = fileIOService.LoadDataList();
+
+                    foreach(NoteModel note in Temp)
+                    {
+                        DataInNotebookList.Add(note);
+                    }
+                }
+                
                 return true;
             }
             catch (Exception e)
@@ -273,11 +316,23 @@ namespace Homework_07
         /// <summary>
         /// Сортировка листа по дате создания записей
         /// </summary>        
-        private void SortByDate(object obj)
+        private void Sort(object obj)
         {
-            MessageBox.Show("Вызов сортировки");
-
-            SortBindingList.SortDate(DataInNotebookList);
-        }
+            if(DataInNotebookList != null)
+            {
+                switch (CurrentSelection.NumberItem)
+                {
+                    case "0":
+                        SortBindingList.SortDate(DataInNotebookList);
+                        break;
+                    case "1":
+                        SortBindingList.SortAssetName(DataInNotebookList);
+                        break;
+                    case "2":
+                        SortBindingList.SortIncome(DataInNotebookList);
+                        break;
+                }
+            }            
+        }        
     }
 }

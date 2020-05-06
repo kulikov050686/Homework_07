@@ -1,14 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows;
 
 namespace Homework_07
 {
     /// <summary>
     /// Класс записи в записной книжке
     /// </summary>
-    public class NoteModel : INotifyPropertyChanged
+    public class NoteModel : BaseModel
     {
         string assetName;
         uint lotVolume;
@@ -16,9 +13,7 @@ namespace Homework_07
         double purchasePrice;
         double sellingPrice;
         double income;
-        string date;
-
-        public static readonly DependencyProperty PriceProperty;
+        string date;        
 
         /// <summary>
         /// Дата создания записи
@@ -26,9 +21,12 @@ namespace Homework_07
         public string Date
         {
             get
-            {
-                date = DateTime.Now.ToString("dd:MM:yyyy");
+            {                
                 return date;
+            }
+            set
+            {
+                date = value;
             }
         }        
 
@@ -159,29 +157,13 @@ namespace Homework_07
         /// </summary>
         public NoteModel()
         {
+            date = DateTime.Now.ToString("dd:MM:yyyy");
             assetName = "";
             lotVolume = 0;
             numberOfLots = 0;
             purchasePrice = 0;
             sellingPrice = 0;
             income = 0;
-        }
-
-        /// <summary>
-        /// Событие появляется при изменении значения свойства
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        /// <summary>
-        /// Обработка события
-        /// </summary>
-        /// <param name="parameter"> Имя изменяемого свойства </param>
-        public void OnPropertyChanged([CallerMemberName]string parameter = "")
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(parameter));
-            }               
-        }
+        }        
     }
 }

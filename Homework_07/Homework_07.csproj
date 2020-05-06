@@ -85,6 +85,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Commands\RelayCommand.cs" />
+    <Compile Include="Models\BaseModel.cs" />
+    <Compile Include="Models\ItemsComboBox.cs" />
     <Compile Include="Services\FileIOService.cs" />
     <Compile Include="Services\SortBindingList.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
